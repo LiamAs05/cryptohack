@@ -1,3 +1,4 @@
+from binascii import hexlify
 from sys import stderr
 
 
@@ -60,3 +61,16 @@ def hex_to_ascii(s: str) -> str:
         str: ASCII string
     """
     return bytearray.fromhex(s).decode()
+
+
+def ascii_to_hex(s: str) -> str:
+    """_summary_
+    Converts an ASCII string to an hex string
+
+    Args:
+        s (str): ASCII string
+
+    Returns:
+        str: hex string
+    """
+    return hexlify(s.encode()).decode()

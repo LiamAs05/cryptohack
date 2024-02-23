@@ -1,23 +1,13 @@
-from requests import get
-from urllib.parse import urljoin
 from binascii import hexlify
-from string import ascii_lowercase, punctuation, digits
+from string import ascii_lowercase, digits, punctuation
+from urllib.parse import urljoin
+
+from requests import get
+
+from utils.utils import get_blocks
 
 URL = r"https://aes.cryptohack.org/ecb_oracle/encrypt/"
 ALLOWED_CHARACTERS = ascii_lowercase + punctuation + digits
-
-
-def get_blocks(ciphertext: str) -> list:
-    """_summary_
-    Splits ciphertext into 16 byte blocks
-
-    Args:
-        ciphertext (str): from `get_ciphertext`
-
-    Returns:
-        list: list of ciphertext blocks, each of len 32 (16 bytes)
-    """
-    return [ciphertext[i : i + 32] for i in range(0, len(ciphertext), 32)]
 
 
 def get_ciphertext(payload: str) -> str:

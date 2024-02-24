@@ -1,6 +1,6 @@
 from string import ascii_lowercase, digits, punctuation
 
-from requests import get, packages
+from requests import get
 
 from utils.utils import ascii_to_hex
 

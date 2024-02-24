@@ -60,7 +60,7 @@ def hex_to_ascii(s: str) -> str:
     Returns:
         str: ASCII string
     """
-    return bytearray.fromhex(s).decode()
+    return bytes.fromhex(s).decode()
 
 
 def ascii_to_hex(s: str) -> str:
@@ -74,3 +74,16 @@ def ascii_to_hex(s: str) -> str:
         str: hex string
     """
     return hexlify(s.encode()).decode()
+
+
+def hex_to_bin(h: str) -> bytes:
+    """_summary_
+    Converts hex to binary
+    
+    Args:
+        h (str): Hexadecimal string
+
+    Returns:
+        bytes: hex bytes
+    """
+    return bytes.fromhex(h)

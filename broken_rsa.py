@@ -8,4 +8,3 @@ ct = Decimal(
 
 
 p = pow(ct, Decimal(1 / 16))
-

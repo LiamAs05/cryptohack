@@ -79,7 +79,7 @@ def ascii_to_hex(s: str) -> str:
 def hex_to_bin(h: str) -> bytes:
     """_summary_
     Converts hex to binary
-    
+
     Args:
         h (str): Hexadecimal string
 

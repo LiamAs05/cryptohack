@@ -1,4 +1,5 @@
 from requests import get
+
 from utils.utils import hex_to_bin, xor_strings
 
 

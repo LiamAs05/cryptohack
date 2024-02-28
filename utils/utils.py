@@ -1,5 +1,25 @@
+import socket as sk
 from binascii import hexlify
 from sys import stderr
+
+
+class PrintingSocket(sk.socket):
+    def recv_print(self) -> bytes:
+        msg = self.recv(4096)
+        try:
+            decoded = msg.decode()
+            print(decoded)
+        except UnicodeDecodeError:
+            print("Not printable!")
+        return msg
+
+    def send_print(self, data: bytes) -> int:
+        try:
+            msg = data.decode()
+            print(msg)
+        except UnicodeDecodeError:
+            print("Not printable!")
+        return self.send(data)
 
 
 def get_blocks(ciphertext: str, size: int = 16) -> list:

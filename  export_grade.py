@@ -1,26 +1,17 @@
-from json import loads
-from math import ceil, sqrt
+from json import loads as json_loads
 from os import system
 from time import sleep
+
+from sage.all import *
 
 from utils.utils import PrintingSocket
 
 
-# https://en.wikipedia.org/wiki/Baby-step_giant-step
-def baby_step_giant_step(p, g, A) -> int:
-    d = {}
-    m = ceil(sqrt(p - 1))
-    for j in range(m):
-        d[pow(g, j, p)] = j
-    print("Finished baby-step")
-
-    c = pow(g, m * (p - 2), p)
-    for i in range(m):
-        temp = (A * pow(c, i, p)) % p
-        if t := d.get(temp, None):
-            return i * m + t
-        temp = temp * c % p
-    print("Finished Giant Step")
+def exploit(p, g, A, B) -> int:
+    F = GF(p)
+    g, A = F(g), F(A)
+    a = discrete_log(A, g)
+    return pow(B, int(a), p)
 
 
 with PrintingSocket() as s:
@@ -33,9 +24,9 @@ with PrintingSocket() as s:
     s.send_print(b'{"chosen": "DH64"}')
     sleep(2)
     params = "".join(s.recv_print().decode().split("Alice: ")[1:])
-    alice_params = loads(params.split("\n")[0])
-    general_params = loads(params.split("\n")[2].split("from ")[1])
-
+    alice_params = json_loads(params.split("\n")[0])
+    general_params = json_loads(params.split("\n")[2].split("from ")[1])
+    B = int(json_loads(params.split("Bob: ")[1:][0].split("\n")[0])["B"], 16)
     p = int(alice_params["p"], 16)
     g = int(alice_params["g"], 16)
     A = int(alice_params["A"], 16)
@@ -48,5 +39,6 @@ with PrintingSocket() as s:
     # Reduces the naive brute force approach to O(sqrt(n)) by using a hashmap
     # and representing the exponent a as im+j.
     # Hence the search will take approx 2**32 steps.
-    print(s := baby_step_giant_step(p, g, A))
+    s = exploit(p, g, A, B)
+
     system(f"python3 utils/decrypt.py {s} {iv} {flag}")

@@ -115,5 +115,5 @@ def get_flag_in_message(m: Union[bytes, str]) -> str:
         m = m.encode()
 
     s = m.index(b"crypto{")
-    e = m.rindex(b"}")
+    e = m.index(b"}")
     return m[s : e + 1].decode()

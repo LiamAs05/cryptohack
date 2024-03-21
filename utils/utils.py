@@ -1,6 +1,7 @@
 import socket as sk
 from binascii import hexlify
 from sys import stderr
+from typing import Union
 
 
 class PrintingSocket(sk.socket):
@@ -107,3 +108,12 @@ def hex_to_bin(h: str) -> bytes:
         bytes: hex bytes
     """
     return bytes.fromhex(h)
+
+
+def get_flag_in_message(m: Union[bytes, str]) -> str:
+    if type(m) == str:
+        m = m.encode()
+
+    s = m.index(b"crypto{")
+    e = m.rindex(b"}")
+    return m[s : e + 1].decode()

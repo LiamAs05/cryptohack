@@ -1,5 +1,6 @@
-from utils.utils import PrintingSocket
 from json import dumps
+
+from utils.utils import PrintingSocket
 
 BLOCK_SIZE = 32
 

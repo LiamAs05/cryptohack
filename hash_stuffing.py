@@ -1,6 +1,6 @@
 from json import dumps
 
-from utils.utils import PrintingSocket
+from utils.utils import PrintingSocket, get_flag_in_message
 
 BLOCK_SIZE = 32
 
@@ -16,4 +16,4 @@ with PrintingSocket() as s:
     s.connect(("socket.cryptohack.org", 13405))
     s.recv_print()
     s.send_print(data)
-    print(s.recv_print()
+    print(get_flag_in_message(s.recv_print()))

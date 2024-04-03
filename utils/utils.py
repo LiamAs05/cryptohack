@@ -2,6 +2,9 @@ import socket as sk
 from binascii import hexlify
 from sys import stderr
 from typing import Union
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 class PrintingSocket(sk.socket):
@@ -117,3 +120,14 @@ def get_flag_in_message(m: Union[bytes, str]) -> str:
     s = m.index(b"crypto{")
     e = m.index(b"}")
     return m[s : e + 1].decode()
+
+
+def get_n_e_from_rsa_pubkey(pubkey: str) -> tuple[int, int]:
+    # Load the RSA public key from PEM format
+    public_key = serialization.load_pem_public_key(pubkey, backend=default_backend())
+
+    # Extract n and e parameters
+    n = public_key.public_numbers().n
+    e = public_key.public_numbers().e
+
+    return n, e

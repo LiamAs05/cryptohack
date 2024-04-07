@@ -4,7 +4,8 @@ from sys import stderr
 from typing import Union
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.asymmetric import rsa
+from re import findall
+from json import loads as js_loads
 
 
 class PrintingSocket(sk.socket):
@@ -131,3 +132,16 @@ def get_n_e_from_rsa_pubkey(pubkey: str) -> tuple[int, int]:
     e = public_key.public_numbers().e
 
     return n, e
+
+
+def parse_dicts(string):
+    # Regular expression to find dictionaries
+    pattern = rb'\{[^{}]*\}'
+    # Find all dictionaries in the string
+    dicts = findall(pattern, string)
+    parsed_dicts = []
+    for d in dicts:
+        # Parse each dictionary string into a Python dictionary
+        parsed_dict = js_loads(d)
+        parsed_dicts.append(parsed_dict)
+    return parsed_dicts

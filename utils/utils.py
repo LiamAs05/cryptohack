@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from re import findall
 from json import loads as js_loads
+from json import dumps
 
 
 class PrintingSocket(sk.socket):
@@ -25,6 +26,13 @@ class PrintingSocket(sk.socket):
         except UnicodeDecodeError:
             print("Not printable!")
         return self.send(data)
+
+    def send_print_dict(self, data: dict) -> int:
+        try:
+            print(data)
+        except UnicodeDecodeError:
+            print("Not printable!")
+        return self.send(dumps(data).encode())
 
 
 def get_blocks(ciphertext: str, size: int = 16) -> list:
@@ -136,7 +144,7 @@ def get_n_e_from_rsa_pubkey(pubkey: str) -> tuple[int, int]:
 
 def parse_dicts(string):
     # Regular expression to find dictionaries
-    pattern = rb'\{[^{}]*\}'
+    pattern = rb"\{[^{}]*\}"
     # Find all dictionaries in the string
     dicts = findall(pattern, string)
     parsed_dicts = []

@@ -1,12 +1,13 @@
 import socket as sk
 from binascii import hexlify
+from json import dumps
+from json import loads as js_loads
+from re import findall
 from sys import stderr
 from typing import Union
-from cryptography.hazmat.primitives import serialization
+
 from cryptography.hazmat.backends import default_backend
-from re import findall
-from json import loads as js_loads
-from json import dumps
+from cryptography.hazmat.primitives import serialization
 
 
 class PrintingSocket(sk.socket):
@@ -18,6 +19,15 @@ class PrintingSocket(sk.socket):
         except UnicodeDecodeError:
             print("Not printable!")
         return msg
+
+    def recv_print_dict(self) -> dict:
+        msg = self.recv(4096)
+        try:
+            decoded = msg.decode()
+            print(js_loads(decoded))
+        except UnicodeDecodeError:
+            print("Not printable!")
+        return js_loads(msg)
 
     def send_print(self, data: bytes) -> int:
         try:
@@ -93,7 +103,16 @@ def hex_to_ascii(s: str) -> str:
     Returns:
         str: ASCII string
     """
+    if s.startswith("0x"):
+        s = s[2:]
+
     return bytes.fromhex(s).decode()
+
+
+def num_to_hexstr(n: int) -> str:
+    if len(s := hex(n)[2:]) % 2 != 0:
+        s = "0" + s
+    return s
 
 
 def ascii_to_hex(s: str) -> str:

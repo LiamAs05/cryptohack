@@ -8,12 +8,13 @@
 # And then call 3DES(K, C) to get FLAG
 
 from requests import get
-from utils.utils import hex_to_ascii, get_flag_in_message
+
+from utils.utils import get_flag_in_message, hex_to_ascii
 
 url = r"https://aes.cryptohack.org/triple_des/"
 
 k1 = "E0FEE0FEF1FEF1FE"
 k2 = "FEE0FEE0FEF1FEF1"
-c = get(url+"encrypt_flag/"+k1+k2).json()["ciphertext"]
-flag = get(url+"encrypt/"+k2+k1+"/"+c).json()["ciphertext"]
+c = get(url + "encrypt_flag/" + k1 + k2).json()["ciphertext"]
+flag = get(url + "encrypt/" + k2 + k1 + "/" + c).json()["ciphertext"]
 print(get_flag_in_message(hex_to_ascii(flag)))

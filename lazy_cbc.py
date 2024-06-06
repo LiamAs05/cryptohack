@@ -1,5 +1,6 @@
-from utils.utils import get_blocks, xor_strings, hex_to_ascii
 from requests import get
+
+from utils.utils import get_blocks, hex_to_ascii, xor_strings
 
 
 def main():

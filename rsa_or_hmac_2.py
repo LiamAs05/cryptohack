@@ -1,12 +1,11 @@
-from Crypto.Util.number import bytes_to_long
-from requests import get
 from base64 import b64decode
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.backends import default_backend
+
 import jwt
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from Crypto.Util.number import bytes_to_long
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from requests import get
 
 
 def main():
@@ -16,7 +15,7 @@ def main():
     h1, d1, s1 = get(url + r"0").json()["session"].split(".")
     tok1_no_sig = h1 + "." + d1
 
-    sig1 = bytes_to_long(b64decode(s1)) # sig1 = (tok1_no_sig)**d % n
+    sig1 = bytes_to_long(b64decode(s1))  # sig1 = (tok1_no_sig)**d % n
 
     hash1 = hashes.Hash(hashes.SHA256(), backend=default_backend())
     hash1.update(tok1_no_sig.encode())  # Assuming the JWT token is in string format

@@ -1,8 +1,10 @@
+from copy import deepcopy
 from os import system
 from time import sleep
-from utils.utils import PrintingSocket, parse_dicts
-from copy import deepcopy
+
 from Crypto.Util import number
+
+from utils.utils import PrintingSocket, parse_dicts
 
 
 def get_hint(s, alice_params):

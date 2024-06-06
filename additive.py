@@ -1,5 +1,6 @@
 from os import system
 from time import sleep
+
 from utils.utils import PrintingSocket, parse_dicts
 
 with PrintingSocket() as s:

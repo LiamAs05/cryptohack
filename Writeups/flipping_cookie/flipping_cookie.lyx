@@ -1,0 +1,660 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "lmodern" "Calibri Light"
+\font_sans "lmss" "Calibri Light"
+\font_typewriter "lmtt" "Calibri Light"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+AES-CBC Data Tampering (
+\begin_inset Quotes eld
+\end_inset
+
+Bit Flipping
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Author
+CryptoHack 
+\begin_inset Quotes eld
+\end_inset
+
+Flipping Cookie
+\begin_inset Quotes erd
+\end_inset
+
+ Writeup
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+AES - A Refresher
+\end_layout
+
+\begin_layout Standard
+AES is a well-known symmetric cipher, encrypting blocks of 16-bytes using
+ keys of length 128, 192 or 256.
+ It is trusted to be a secure cipher, protecting the data transmitted over
+ an insecure channel from a 3rd party.
+\end_layout
+
+\begin_layout Subsection*
+Modes of Operation - ECB
+\end_layout
+
+\begin_layout Standard
+There are many ways to use AES, from just a classic block cipher all the
+ way to using it as a stream cipher.
+\end_layout
+
+\begin_layout Standard
+The most basic mode of AES is ECB (Electronic codebook), which, given a
+ key, encrypts every 16 bytes to the same 16 byte block.
+\end_layout
+
+\begin_layout Standard
+In summary, given a plaintext 
+\begin_inset Formula $p$
+\end_inset
+
+, key 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+, the encryption function of AES-ECB for a key 
+\begin_inset Formula $k$
+\end_inset
+
+, we know that: 
+\begin_inset Formula $c=e_{k}(p)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Since this is the result every time 
+\begin_inset Formula $p$
+\end_inset
+
+ is encrypted.
+ This allows an attacker to easily identify patterns in the encrypted data.
+\end_layout
+
+\begin_layout Subsection*
+Modes of Operation - CBC
+\end_layout
+
+\begin_layout Standard
+CBC differs from ECB by providing 
+\series bold
+diffusion.
+
+\series default
+ In CBC, the ciphertext is starts from 
+\begin_inset Formula $C_{0}=IV$
+\end_inset
+
+ where 
+\begin_inset Formula $IV$
+\end_inset
+
+ (or 
+\series bold
+Initialization Vector
+\series default
+) are 
+\begin_inset Quotes eld
+\end_inset
+
+random
+\begin_inset Quotes erd
+\end_inset
+
+ 16 bytes (it does not have to actually be random to provide diffusion,
+ just not repeating).
+\end_layout
+
+\begin_layout Standard
+Then, for every 
+\begin_inset Formula $P_{1},P_{2},\ldots,P_{i}$
+\end_inset
+
+, we encrypt using 
+\begin_inset Formula $C_{i}=e_{k}(P_{i}\oplus C_{i-1})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This means that 
+\begin_inset Formula $d_{k}(C_{i})=d_{k}\left(e_{k}(P_{i}\oplus C_{i-1})\right)=P_{i}\oplus C_{i-1}$
+\end_inset
+
+, so to decrypt, we XOR with the previous ciphertext again.
+\end_layout
+
+\begin_layout Standard
+Hence:
+\begin_inset Formula 
+\[
+d_{k}(C_{i})\oplus C_{i-1}=P_{i}\oplus C_{i-1}\oplus C_{i-1}=P_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Flipping Cookie
+\end_layout
+
+\begin_layout Standard
+You can get a cookie for my website, but it won't help you read the flag...
+ I think.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename flipping_cookie.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's asses the situation:
+\end_layout
+
+\begin_layout Itemize
+The cipher used is AES-CBC.
+\end_layout
+
+\begin_layout Itemize
+We have a cookie for a website, containing a date of expiry and user permissions.
+\end_layout
+
+\begin_layout Itemize
+Randomized IV and unknown Key, correct Padding.
+\end_layout
+
+\begin_layout Itemize
+We are allowed to decrypt whatever we want, but we can only encrypt the
+ cookie.
+\end_layout
+
+\begin_layout Itemize
+We also can't see the result of decryption.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Some XORing
+\end_layout
+
+\begin_layout Standard
+Let's say we can decrypt, and we have a part of the ciphertext, similar
+ to the conditions we have in the challenge (but a simpler encryption).
+\end_layout
+
+\begin_layout Itemize
+Assume 
+\begin_inset Formula $P$
+\end_inset
+
+ is an 8-letter string, that starts with 
+\begin_inset Formula $"hello"$
+\end_inset
+
+, and 
+\begin_inset Formula $P\oplus IV$
+\end_inset
+
+ happens (we know the IV, since it's a public property).
+\end_layout
+
+\begin_layout Itemize
+We want the decrypted ciphertext to contain the word 
+\begin_inset Formula $"admin"$
+\end_inset
+
+.
+ (which is impossible without tampering)
+\end_layout
+
+\begin_layout Itemize
+We can provide 
+\begin_inset Formula $C$
+\end_inset
+
+ and 
+\begin_inset Formula $IV$
+\end_inset
+
+ to the decryptor, which will then do 
+\begin_inset Formula $C\oplus IV=P\oplus IV\oplus IV=P$
+\end_inset
+
+ to obtain 
+\begin_inset Formula $P$
+\end_inset
+
+ again.
+\end_layout
+
+\begin_layout Standard
+From the structure of AES-CBC, we know that changing a bit in the 
+\begin_inset Formula $IV$
+\end_inset
+
+ will alter the first decrypted plaintext block.
+\end_layout
+
+\begin_layout Standard
+How can we use this fact? Let's see, we will create 
+\begin_inset Formula $IV_{2}=IV\oplus"hello"\oplus"admin"$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+(In words, let's convert 
+\begin_inset Quotes eld
+\end_inset
+
+hello
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+admin
+\begin_inset Quotes erd
+\end_inset
+
+ to bytes and xor the first 5 bytes of 
+\begin_inset Formula $IV$
+\end_inset
+
+ with them).
+\end_layout
+
+\begin_layout Standard
+Now the decryptor will do:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $P^{'}=C\oplus IV_{2}=C\oplus IV\oplus"helllo"\oplus"admin"="hello..."\oplus"hello"\oplus"admin"="admin..."$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+See what happened?
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Formula $C\oplus IV$
+\end_inset
+
+ retrieved the original 
+\begin_inset Formula $P="hello..."$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+We then XOR'd the first 5 bytes of 
+\begin_inset Formula $P$
+\end_inset
+
+ with 
+\begin_inset Formula $"hello"$
+\end_inset
+
+, creating 5 bytes filled with 0 (since 
+\begin_inset Formula $x\oplus x=0$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Enumerate
+We then XOR'd the firtst 5 bytes of the result from (2) with 
+\begin_inset Formula $"admin"$
+\end_inset
+
+, causing the first 5 bytes to be 
+\begin_inset Formula $"admin"$
+\end_inset
+
+ (since 
+\begin_inset Formula $x\oplus0=x$
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Standard
+So we forced 
+\begin_inset Formula $"admin"$
+\end_inset
+
+ to appear on the plaintext string!
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Solving The Flipping Cookie
+\end_layout
+
+\begin_layout Standard
+Let's get a random cookie using the API.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename flipping_cookie_2.png
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And split it to blocks, using Python.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename flipping_cookie_3.png
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We know:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $IV=\boxed{'edd2553317f67b5b6a9843c3970a1075'}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $mal=\boxed{"admin=False"\oplus"admin=True;"='000000000000121319165e'}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's set our malicious IV to be 
+\begin_inset Formula $IV_{2}=IV\oplus mal$
+\end_inset
+
+, so 
+\begin_inset Formula $\boxed{IV_{2}='edd2553317f66948738e1dc3970a1075'}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace 1cm
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We know that 
+\begin_inset Formula $"admin=False"$
+\end_inset
+
+ is in the 2nd of the three blocks, since it's in the start of the ciphertext
+ and is smaller than 16 bytes, so it fits in a single block.
+ Consider 
+\begin_inset Formula $P="admin=False;expiry=29485923852"$
+\end_inset
+
+ as an example to what's about to happen.
+\end_layout
+
+\begin_layout Standard
+We know that 
+\begin_inset Formula $C_{1}=e_{k}(P\oplus C_{0})=e_{k}(P\oplus IV)$
+\end_inset
+
+, so 
+\begin_inset Formula $d_{k}(C_{1})\oplus IV=\left(P\oplus IV\right)\oplus IV=P$
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Standard
+So if we change the decryption IV to be 
+\begin_inset Formula $IV_{2}$
+\end_inset
+
+, we get:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+d_{k}(C_{1})\oplus IV_{2}=\left(P\oplus IV\right)\oplus IV\oplus"admin=False"\oplus"admin=True;"
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=P\oplus"admin=False"\oplus"admin=True;"
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+="admin=False;expiry=29485923852"\oplus"admin=False"\oplus"admin=True;"
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boxed{="admin=True;;expiry=29485923852"}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So, in order to pwn the challenge we need to 
+\begin_inset Formula $d(cookie,IV_{2})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Let's submit 
+\begin_inset Formula $IV_{2}$
+\end_inset
+
+ as the 
+\begin_inset Formula $IV$
+\end_inset
+
+, and the following 2 blocks as the cookie:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename flipping_cookie_4.png
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And now we have the flipping cookie!
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+
+\series bold
+\begin_inset Graphics
+	filename flipping_cookie_5.png
+	scale 80
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

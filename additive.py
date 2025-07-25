@@ -13,7 +13,7 @@ with PrintingSocket() as s:
     C = pow(g, p - 2, p)
     flag = flag_params["encrypted"]
     iv = flag_params["iv"]
-    ss = (A * B * C) % p  # By Fermat's little theorom, g**p = g mod p
+    ss = (A * B * C) % p  # By Fermat's little theorem, g**p = g mod p
     # We also know that DH in additive groups calculates A=g*a instead of g**a
     # So we have g*a and g*b, we can compute A*B=(g*a)(g*b)=a*b*g**2
     # The Shared Secret is a*b*g, and using Fermat's little theorom we can obtain it

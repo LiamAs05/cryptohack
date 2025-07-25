@@ -26,6 +26,7 @@ def get_ciphertext():
 def main():
     c = get_ciphertext()
     exploit(c)
+    print("Flag written to ./bean_flag.png")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 import socket as sk
-from binascii import hexlify
 from sys import stderr
 from typing import Union
 from cryptography.hazmat.primitives import serialization
@@ -119,8 +118,7 @@ def ascii_to_hex(s: str) -> str:
     Returns:
         str: hex string
     """
-    return hexlify(s.encode()).decode()
-
+    return s.encode().hex()
 
 def hex_to_bin(h: str) -> bytes:
     """_summary_

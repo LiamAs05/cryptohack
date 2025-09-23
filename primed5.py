@@ -1,0 +1,63 @@
+from Crypto.Util.number import isPrime, bytes_to_long
+from Crypto.Hash import MD5
+from utils.utils import PrintingSocket
+import json
+import math
+
+
+# two blocks with the same MD5 hash
+b1 = [
+    0x4D, 0xC9, 0x68, 0xFF, 0x0E, 0xE3, 0x5C, 0x20, 0x95, 0x72, 0xD4, 0x77, 0x7B, 0x72, 0x15, 0x87, 
+    0xD3, 0x6F, 0xA7, 0xB2, 0x1B, 0xDC, 0x56, 0xB7, 0x4A, 0x3D, 0xC0, 0x78, 0x3E, 0x7B, 0x95, 0x18, 
+    0xAF, 0xBF, 0xA2, 0x00, 0xA8, 0x28, 0x4B, 0xF3, 0x6E, 0x8E, 0x4B, 0x55, 0xB3, 0x5F, 0x42, 0x75, 
+    0x93, 0xD8, 0x49, 0x67, 0x6D, 0xA0, 0xD1, 0x55, 0x5D, 0x83, 0x60, 0xFB, 0x5F, 0x07, 0xFE, 0xA2, 
+]
+b2 = [
+    0x4D, 0xC9, 0x68, 0xFF, 0x0E, 0xE3, 0x5C, 0x20, 0x95, 0x72, 0xD4, 0x77, 0x7B, 0x72, 0x15, 0x87, 
+    0xD3, 0x6F, 0xA7, 0xB2, 0x1B, 0xDC, 0x56, 0xB7, 0x4A, 0x3D, 0xC0, 0x78, 0x3E, 0x7B, 0x95, 0x18, 
+    0xAF, 0xBF, 0xA2, 0x02, 0xA8, 0x28, 0x4B, 0xF3, 0x6E, 0x8E, 0x4B, 0x55, 0xB3, 0x5F, 0x42, 0x75, 
+    0x93, 0xD8, 0x49, 0x67, 0x6D, 0xA0, 0xD1, 0xD5, 0x5D, 0x83, 0x60, 0xFB, 0x5F, 0x07, 0xFE, 0xA2, 
+]
+
+def append_until_prime(block):
+    i = 0
+    block.append(0)
+    while not isPrime(bytes_to_long(bytes(block))):
+        block[-1] = i
+        i += 1
+    return i
+
+def get_hash(block):
+    return MD5.new(block)
+
+def find_sufficient_divisor(num, min=20):
+    for i in range(min, math.floor(math.sqrt(num)) + 1):
+        if num % i == 0:
+            return i
+    
+def main():
+    # find the bytes to append so that the first one is prime (ideally, check that the second one isn't prime too now)
+    i = append_until_prime(b1)
+    # append to the second block of bytes too
+    b2.append(i - 1)
+    
+    # create new hashes from (b1 || suffix) and (b2 || suffix), since suffix is the same and md5(b1) == md5(b2), we'll get the same digests
+    h1 = get_hash(bytes(b1))
+    h2 = get_hash(bytes(b2))
+
+    # sanity checks
+    print("Digests equal?", h1.digest() == h2.digest())
+    print(f"Updated h1 isPrime? {isPrime(bytes_to_long(bytes(b1)))}\nh2 isPrime? {isPrime(bytes_to_long(bytes(b2)))}")
+
+    b1_as_long = bytes_to_long(bytes(b1))
+    b2_as_long = bytes_to_long(bytes(b2))
+    with PrintingSocket() as s:
+        s.connect(("socket.cryptohack.org", 13392))
+        s.recv_print()
+        s.send_dict({"option": "sign", "prime": b1_as_long})
+        sig = json.loads(s.recv_print().decode())["signature"]
+        s.send_dict({"option": "check", "prime": b2_as_long, "signature": sig, "a": find_sufficient_divisor(b2_as_long)})
+        s.recv_print()
+
+if __name__ == "__main__":
+    main()
